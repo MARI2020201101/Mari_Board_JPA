@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="~{/layout/basic::setContent(~{this::content})}">
+
+  <th:block th:fragment="content">
+
+    <h1 class="mt-4">GuestBook Modify Page</h1>
+
+    <form th:action="@{/guestbook/modify}" method="post">
+      <input type="hidden" name="page" th:value="${requestDto.page}">
+      <div class="form-group">
+        <label>Gno</label>
+        <input type="text" class="form-control" name="gno" th:value="${dto.gno}" readonly>
+      </div>
+      <div class="form-group">
+        <label>Title</label>
+        <input type="text" class="form-control" name="title" th:value="${dto.title}" >
+      </div>
+      <div class="form-group">
+        <label>Content</label>
+        <textarea class="form-control" rows="5" name="content" >[[${dto.content}]]</textarea>
+      </div>
+      <div class="form-group">
+        <label>Writer</label>
+        <input type="text" class="form-control" name="writer" th:value="${dto.writer}" readonly>
+      </div>
+      <div class="form-group">
+        <label>RegDate</label>
+        <input type="text" class="form-control"
+               th:value="${#temporals.format(dto.regDate, 'yyyy/MM/dd')}" readonly>
+      </div>
+      <div class="form-group">
+        <label>ModDate</label>
+        <input type="text" class="form-control"
+               th:value="${#temporals.format(dto.modDate, 'yyyy/MM/dd')}" readonly>
+      </div>
+      <button class="btn btn-primary modifyBtn">Modify</button>
+
+      <button class="btn btn-info listBtn">List</button>
+
+      <button class="btn btn-danger removeBtn">Remove</button>
+    </form>
+
+    <script th:inline="javascript">
+      $(".modifyBtn").on("click",function(e){
+        e.preventDefault();
+        if(!confirm("수정하시겠습니까?")){
+          return;
+        }
+        var actionForm = $("form");
+        actionForm.submit();
+      });
+
+      $(".removeBtn").on("click",function(e){
+        e.preventDefault();
+        var actionForm = $("form");
+        actionForm.attr("action","/guestbook/remove");
+        actionForm.submit();
+      });
+
+      $(".listBtn").on("click",function(e){
+        e.preventDefault();
+        var actionForm = $("form");
+        actionForm.attr("action","/guestbook/read");
+        actionForm.attr("method","get");
+        actionForm.submit();
+      });
+    </script>
+  </th:block>
+
+</th:block>
+</html>
