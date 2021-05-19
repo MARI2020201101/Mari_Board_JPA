@@ -42,27 +42,29 @@
     </form>
 
     <script th:inline="javascript">
+      var actionForm = $("form");
       $(".modifyBtn").on("click",function(e){
         e.preventDefault();
         if(!confirm("수정하시겠습니까?")){
           return;
         }
-        var actionForm = $("form");
         actionForm.submit();
       });
 
       $(".removeBtn").on("click",function(e){
         e.preventDefault();
-        var actionForm = $("form");
         actionForm.attr("action","/guestbook/remove");
         actionForm.submit();
       });
 
       $(".listBtn").on("click",function(e){
         e.preventDefault();
-        var actionForm = $("form");
-        actionForm.attr("action","/guestbook/read");
+        var pageInfo = $("input[name=page]");
+        actionForm.empty();
+        actionForm.append(pageInfo);
+        actionForm.attr("action","/guestbook/list");
         actionForm.attr("method","get");
+        console.log(actionForm.html());
         actionForm.submit();
       });
     </script>
