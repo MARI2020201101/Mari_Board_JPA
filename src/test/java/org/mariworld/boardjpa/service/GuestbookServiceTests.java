@@ -52,4 +52,17 @@ public class GuestbookServiceTests {
         System.out.println(result.isNext());
         System.out.println(result.isPrev());
     }
+    @Test
+    public void getSearchTest(){
+        PageRequestDTO pageRequestDTO =
+                PageRequestDTO.builder()
+                        .page(1)
+                        .size(10)
+                        .type("tc")
+                        .keyword("")
+                        .build();
+        guestbookService.getList(pageRequestDTO)
+                .getDtoList()
+                .forEach(System.out::println);
+    }
 }

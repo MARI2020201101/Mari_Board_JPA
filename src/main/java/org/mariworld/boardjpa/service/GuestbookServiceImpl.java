@@ -1,11 +1,14 @@
 package org.mariworld.boardjpa.service;
 
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.mariworld.boardjpa.dto.GuestbookDTO;
 import org.mariworld.boardjpa.dto.PageRequestDTO;
 import org.mariworld.boardjpa.dto.PageResultDTO;
 import org.mariworld.boardjpa.entity.Guestbook;
+import org.mariworld.boardjpa.entity.QGuestbook;
 import org.mariworld.boardjpa.repository.GuestbookRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -31,7 +34,10 @@ public class GuestbookServiceImpl implements GuestbookService{
 
     public PageResultDTO<GuestbookDTO,Guestbook> getList(PageRequestDTO pageRequestDTO){
         PageRequest pageRequest =pageRequestDTO.getPageable(Sort.by("gno").descending());
-        Page<Guestbook> result =guestbookRepository.findAll(pageRequest);
+
+        //조건검색
+        BooleanBuilder booleanBuilder = getSearch(pageRequestDTO);
+        Page<Guestbook> result =guestbookRepository.findAll(booleanBuilder, pageRequest);
         Function<Guestbook,GuestbookDTO> fn = i->entityToDto(i);
         //바로 stream으로 List전달해도 OK
         return new PageResultDTO<>(result,fn);
@@ -62,4 +68,32 @@ public class GuestbookServiceImpl implements GuestbookService{
             guestbookRepository.save(entity);
             }
         }
+
+    private BooleanBuilder getSearch(PageRequestDTO dto){
+        //기본 조건 : gno>0
+        QGuestbook qGuestbook = QGuestbook.guestbook;
+        BooleanBuilder booleanBuilder = new BooleanBuilder();
+        BooleanExpression expression = qGuestbook.gno.goe(0L);
+        booleanBuilder.and(expression);
+        String type = dto.getType();
+
+        //검색조건 없는 경우
+        if(type==null||type.trim().length()==0){
+            return booleanBuilder;
+        }
+
+        //검색조건 있는 경우
+        String keyword = dto.getKeyword();
+        BooleanBuilder conditionBuilder = new BooleanBuilder();
+        if(dto.getType().contains("t"))
+            conditionBuilder.or(qGuestbook.title.contains(keyword));
+        if(dto.getType().contains("c"))
+            conditionBuilder.or(qGuestbook.content.contains(keyword));
+        if(dto.getType().contains("w"))
+            conditionBuilder.or(qGuestbook.writer.contains(keyword));
+
+        //모든 조건 통합
+        booleanBuilder.and(conditionBuilder);
+        return booleanBuilder;
+    }
     }
